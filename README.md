@@ -49,7 +49,7 @@
     This method is a memory efficient.
 
 ##### shuflle
-      Shuffle the provided array.
+      Shuffles the provided array.
       Doesn't return anything.
 
 ### Benchmarks
