@@ -1,3 +1,60 @@
+package Test::TiedArray;
+
+use utf8;
+use strict;
+use warnings;
+
+sub STORE {
+    my ($self, $key, $value) = @_;
+#use Data::Dumper; warn Dumper([$key, $value]);
+    return $self->{data}[$key] = $value;
+}
+
+sub PUSH {
+    my ($self, @values) = @_;
+    push(@{$self->{data}}, @values);
+    $self->STORESIZE(scalar(@{$self->{data} // []}));
+}
+
+sub TIEARRAY {
+    my ($class, @list) = @_;
+    my $self = bless({data => []}, $class);
+    return $self;
+}
+
+sub FETCHSIZE {
+    my ($self) = @_;
+    return $self->{count} // 0;
+}
+
+sub STORESIZE {
+    my ($self, $count) = @_;
+    return ($self->{count} = $count);
+}
+
+sub FETCH {
+    my ($self, $index) = @_;
+    return($self->{data}->[$index]);
+}
+
+sub DELETE {
+    my ($self, $key) = @_;
+    return splice(@{$self->{data}}, $key, 1);
+}
+
+sub CLEAR {
+    my ($self) = @_;
+    return($self->{data} = []);
+}
+
+sub DESTROY {
+    my ($self) = @_;
+    delete(@{$self}{qw/data count/});
+    return;
+}
+
+1;
+
 package main;
 
 use utf8;
@@ -31,6 +88,32 @@ is( scalar(@$slice), 3, "Checking the slice size" );
 undef(@list);
 undef($slice);
 
+# tied lists
+
+use Data::Dumper qw/ Dumper /;
+
+my @t_list;
+tie(@t_list, "Test::TiedArray");
+push(@t_list, ( 0 .. 9 ) );
+
+shuffle(\@t_list);
+is( scalar(@t_list), 10, "Checking the size of tied list after shuffling" );
+
+List::Helpers::XS::shuffle(@t_list);
+is( scalar(@t_list), 10, "Checking the size of tied list after shuffling" );
+
+random_slice_void(\@t_list, 5);
+is( scalar(@t_list), 5, "Checking the size of tied list after slicing in void context" );
+
+push(@t_list, (11 .. 15));
+
+#my $t_slice = random_slice(\@t_list, 4);
+#is( scalar(@t_list), 10, "Checking the size of tied after slicing" );
+#is( scalar(@$slice), 4, "Checking the size of tied slice" );
+
+undef(@t_list);
+#undef($t_slice);
+
 # check for memory leaks
 no_leaks_ok {
 
@@ -45,6 +128,19 @@ no_leaks_ok {
     
     $slice = random_slice_void(\@list, 5);
 
+    # tied array
+
+    @t_list = ();
+    tie(@t_list, "Test::TiedArray");
+
+    push(@t_list, ( 0 .. 3 ) );
+
+    #shuffle(\@t_list);
+    #List::Helpers::XS::shuffle(@t_list);
+
+    #random_slice_void(\@t_list, 2);
+
+    undef(@t_list);
 } 'no memory leaks';
 
 done_testing();
