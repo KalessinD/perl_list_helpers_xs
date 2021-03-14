@@ -18,7 +18,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw//;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 require XSLoader;
 XSLoader::load('List::Helpers::XS', $VERSION);
@@ -56,11 +56,6 @@ Otherwise the original array will be truncated down to C<num> elements.
 
 It doesn't shuffle the whole array, it shuffle only C<num> elements and returns only them.
 
-This method can a bit slow down in case of huge arrays and C<num>,
-because of it copies chosen elements into the new array to be returned
-
-In this case please consider the usage of C<random_slice_void> method.
-
 Also the original array will be shuffled at the end.
 
 =head2 random_slice_void
@@ -71,11 +66,13 @@ shuffles array's elements. Doesn't return anything.
 After method being called the passed array will contain only
 random C<num> elements from the original array.
 
-This method is a memory efficient.
+This method is a memory efficient, but it can a bit slow down in case of huge arrays and C<num>.
+
+In this case please consider the usage of C<random_slice_void> method.
 
 =head2 shuflle
 
-  Shuffle the provided array.
+  Shuffles the provided array.
   Doesn't return anything.
 
 =cut
@@ -83,57 +80,57 @@ This method is a memory efficient.
 =head1 Benchmarks
 
 Below you can find some benchmarks of C<random_slice> and C<random_slice_void> methods
-in comparison with C<Array::Shuffle::shuffle_array> / C<Array::Shuffle::array_shuffle_huge_array>
+in comparison with C<Array::Shuffle::shuffle_array> / C<Array::Shuffle::shuffle_huge_array>
 with C<splice> method invocation afterwards.
 
-=begin text
-
 Total amount of elements in initial array: 250
-Benchmark: timing 1000000 iterations of Array::Shuffle::shuffle_array, Array::Shuffle::shuffle_huge_array, List::Helpers::XS::random_slice, List::Helpers::XS::random_slice_void...
-                                         Rate Array::Shuffle::shuffle_huge_array Array::Shuffle::shuffle_array List::Helpers::XS::random_slice List::Helpers::XS::random_slice_void
-Array::Shuffle::shuffle_huge_array    94877/s                                 --                           -0%                            -38%                                 -44%
-Array::Shuffle::shuffle_array         94967/s                                 0%                            --                            -38%                                 -44%
-List::Helpers::XS::random_slice      152439/s                                61%                           61%                              --                                 -10%
-List::Helpers::XS::random_slice_void 168634/s                                78%                           78%                             11%                                   --
 
-=end text
+                    Rate       shuffle_huge_array  random_slice  random_slice_void
+shuffle_huge_array  94967/s    --             -38%          -44%
+random_slice        152439/s   61%            --            -10%
+random_slice_void   168634/s   78%            11%           --
 
-=begin text
+
+                   Rate       shuffle_array  random_slice  random_slice_void
+shuffle_array      94877/s    --             -38%          -44%
+random_slice       152439/s   61%            --            -10%
+random_slice_void  168634/s   78%            11%           --
+
 
 Total amount of elements in initial array: 25_000
 
-Benchmark: timing 100000 iterations of Array::Shuffle::shuffle_array, Array::Shuffle::shuffle_huge_array, List::Helpers::XS::random_slice, List::Helpers::XS::random_slice_void...                                               
-                                       Rate Array::Shuffle::shuffle_array Array::Shuffle::shuffle_huge_array List::Helpers::XS::random_slice_void List::Helpers::XS::random_slice
-Array::Shuffle::shuffle_array         994/s                            --                                -0%                                 -37%                            -42%
-Array::Shuffle::shuffle_huge_array    994/s                            0%                                 --                                 -37%                            -42%
-List::Helpers::XS::random_slice_void 1588/s                           60%                                60%                                   --                             -8%
-List::Helpers::XS::random_slice      1726/s                           74%                                74%                                   9%                              --
+                     Rate    shuffle_huge_array random_slice_void  random_slice
+shuffle_huge_array    994/s  --                 -37%               -42%
+random_slice_void    1588/s  60%                --                 -8%
+random_slice         1726/s  74%                9%                 --
 
-=end text
+
+                     Rate    shuffle_array  random_slice_void  random_slice
+shuffle_array         994/s  --             -37%               -42%
+random_slice_void    1588/s  60%            --                 -8%
+random_slice         1726/s  74%            9%                 --
+
 
 Total amount of elements in initial array: 250_000
 
-=begin text
+                    Rate    shuffle_huge_array  random_slice_void  random_slice
+shuffle_huge_array  45.3/s  --                  -54%               -59%
+random_slice_void   97.8/s  116%                --                 -11%
+random_slice        110/s   144%                13%                --
 
-Benchmark: timing 10000 iterations of Array::Shuffle::shuffle_array, Array::Shuffle::shuffle_huge_array, List::Helpers::XS::random_slice, List::Helpers::XS::random_slice_void...
-                                       Rate Array::Shuffle::shuffle_huge_array Array::Shuffle::shuffle_array List::Helpers::XS::random_slice_void List::Helpers::XS::random_slice
-Array::Shuffle::shuffle_huge_array   45.3/s                                 --                          -38%                                 -54%                            -59%
-Array::Shuffle::shuffle_array        73.6/s                                62%                            --                                 -25%                            -33%
-List::Helpers::XS::random_slice_void 97.8/s                               116%                           33%                                   --                            -11%
-List::Helpers::XS::random_slice       110/s                               144%                           50%                                  13%                              --
 
-=end text
+                    Rate    shuffle_array  random_slice_void  random_slice
+shuffle_array       73.6/s  --             -25%               -33%
+random_slice_void   97.8/s  33%            --                 -11%
+random_slice        110/s   50%            13%                --
 
-The same benchmark for C<shuffle>
 
-=begin text
+The same benchmark for C<shuffle> method
 
-                                      Rate Array::Shuffle::shuffle_array Array::Shuffle::shuffle_huge_array List::Helpers::XS
-Array::Shuffle::shuffle_array      56883/s                            --                                -0%               -2%
-Array::Shuffle::shuffle_huge_array 57078/s                            0%                                 --               -2%
-List::Helpers::XS                  58173/s                            2%                                 2%                --
-
-=end text
+                    Rate     shuffle_array shuffle_huge_array  shuffle
+shuffle_array       56883/s  0%            -2%                 -2%
+shuffle_huge_array  57078/s  0%            --                  -2%
+shuffle             58173/s  2%            2%                  --
 
 =head1 AUTHOR
 
