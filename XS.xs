@@ -67,10 +67,11 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
             rand_index = cur_index + (len - cur_index) * Drand01(); // rand() % cur_index;
             a = (SV*) *av_fetch(av,  cur_index, 0);
             b = (SV*) *av_fetch(av, rand_index, 0);
-            // if "av_store" returns NULL, the caller will have to decrement the reference count to avoid a memory leak
-            if (av_store(av,  cur_index, SvREFCNT_inc_simple(b)) == NULL)
+            SvREFCNT_inc_simple_void(b);
+            SvREFCNT_inc_simple_void(a);
+            if (av_store(av,  cur_index, b) == NULL)
                 SvREFCNT_dec(b);
-            if (av_store(av, rand_index, SvREFCNT_inc_simple(a)) == NULL)
+            if (av_store(av, rand_index, a) == NULL)
                 SvREFCNT_dec(a);
 
             cur_index++;
@@ -131,7 +132,7 @@ PPCODE:
     XSRETURN(1);
 
 
-AV* random_slice_void (av, num)
+void random_slice_void (av, num)
     AV* av
     IV num
 PPCODE:
