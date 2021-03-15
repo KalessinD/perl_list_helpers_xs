@@ -6,28 +6,36 @@
 ### SYNOPSIS
 
 ```perl
-    use List::Helpers::XS qw/ :shuffle :slice /;
+  use List::Helpers::XS qw/ :shuffle :slice /;
 
-    my @slice = random_slice(\@list, $size);
+  my @slice = random_slice(\@list, $size);
 
-    random_slice_void(\@list, $size);
+  random_slice_void(\@list, $size);
 
-    shuffle(\@list);
-    shuffle(@list);
+  shuffle(\@list);
+  shuffle(@list);
+
+  # the same for tied arrays
+
+  tie(@list, "MyPackage");
+  shuffle(@list);
+  shuffle(\@list);
+  random_slice_void(\@list, $size);
+  my $slice = random_slice(\@list, $size); # returns array reference
 ```
 
 ### DESCRIPTION
     This module provides some rare but usefull functions to work with
     arrays.
+    It supports tied arrays.
 
 ##### random_slice
     This method receives an array and amount of required elements from it,
-    shuffles array's elements and returns the "num" elements from it.
+    shuffles array's elements and returns the array reference to the new
+    arrays with C<num> elements from original one.
 
     If "num" is equal or higher than amount of elements in array, then it
     won't do any work.
-
-    Otherwise the original array will be truncated down to "num" elements.
 
     It doesn't shuffle the whole array, it shuffle only "num" elements and
     returns only them.
