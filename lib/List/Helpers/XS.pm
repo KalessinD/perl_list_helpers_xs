@@ -18,7 +18,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw//;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 require XSLoader;
 XSLoader::load('List::Helpers::XS', $VERSION);
@@ -93,52 +93,61 @@ with C<splice> method invocation afterwards.
 
 Total amount of elements in initial array: 250
 
-                    Rate       shuffle_huge_array  random_slice  random_slice_void
-shuffle_huge_array  94967/s    --                  -38%          -44%
-random_slice        152439/s   61%                 --            -10%
-random_slice_void   168634/s   78%                 11%           --
-
-
-                   Rate       shuffle_array  random_slice  random_slice_void
-shuffle_array      94877/s    --             -38%          -44%
-random_slice       152439/s   61%            --            -10%
-random_slice_void  168634/s   78%            11%           --
-
+                             Rate shuffle_array and splice random_slice random_slice_void
+shuffle_array and splice  95511/s                       --         -45%              -52%
+random_slice             174216/s                      82%           --              -12%
+random_slice_void        198020/s                     107%          14%                --
 
 Total amount of elements in initial array: 25_000
 
-                     Rate    shuffle_huge_array random_slice_void  random_slice
-shuffle_huge_array    994/s  --                 -37%               -42%
-random_slice_void    1588/s  60%                --                 -8%
-random_slice         1726/s  74%                9%                 --
-
-
-                     Rate    shuffle_array  random_slice_void  random_slice
-shuffle_array         994/s  --             -37%               -42%
-random_slice_void    1588/s  60%            --                 -8%
-random_slice         1726/s  74%            9%                 --
-
+                            Rate shuffle_array and splice random_slice_void random_slice
+shuffle_array and splice 11299/s                       --              -45%         -49%
+random_slice_void        20408/s                      81%                --          -8%
+random_slice             22124/s                      96%                8%           --
 
 Total amount of elements in initial array: 250_000
 
-                    Rate    shuffle_huge_array  random_slice_void  random_slice
-shuffle_huge_array  45.3/s  --                  -54%               -59%
-random_slice_void   97.8/s  116%                --                 -11%
-random_slice        110/s   144%                13%                --
+                           Rate shuffle_array and splice random_slice_void random_slice
+shuffle_array and splice 74.7/s                       --              -63%         -67%
+random_slice_void         203/s                     172%                --          -9%
+random_slice              224/s                     200%               10%           --
 
+The benchmark code is below:
 
-                    Rate    shuffle_array  random_slice_void  random_slice
-shuffle_array       73.6/s  --             -25%               -33%
-random_slice_void   97.8/s  33%            --                 -11%
-random_slice        110/s   50%            13%                --
+  cmpthese (
+      1_000_000,
+      {
+          'shuffle_array and splice' => sub {
+              my $arr = [@array];
+              if ($slice_size < scalar $arr->@*) {
+                  shuffle_array(@$arr);
+                  $arr = [splice(@$arr, 0, $slice_size)];
+              }
+          },
+          'random_slice' => sub {
+              my $arr = [@array];
+              $arr = random_slice($arr, $slice_size);
+          },
+          'random_slice_void' => sub {
+              my $arr = [@array];
+              random_slice_void($arr, $slice_size);
+          },
+      }
+    );
 
+The benchmark results for C<shuffle> method
 
-The same benchmark for C<shuffle> method
+                                Rate  shuffle_huge_array List::Helpers::XS::shuffle
+shuffle_huge_array          112233/s  --                 -4%
+List::Helpers::XS::shuffle  116414/s  4%                 --
 
-                    Rate     shuffle_array shuffle_huge_array  shuffle
-shuffle_array       56883/s  0%            -2%                 -2%
-shuffle_huge_array  57078/s  0%            --                  -2%
-shuffle             58173/s  2%            2%                  --
+                                Rate  shuffle_array  List::Helpers::XS::shuffle
+shuffle_array               112233/s  --             -3%
+List::Helpers::XS::shuffle  116279/s  4%             --
+
+                               Rate  List::Util::shuffle  List::Helpers::XS::shuffle
+List::Util::shuffle         62539/s  --                   -46%
+List::Helpers::XS::shuffle 116550/s  86%                  --
 
 =head1 AUTHOR
 

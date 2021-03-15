@@ -6,7 +6,6 @@ use warnings;
 
 sub STORE {
     my ($self, $key, $value) = @_;
-#use Data::Dumper; warn Dumper([$key, $value]);
     return $self->{data}[$key] = $value;
 }
 

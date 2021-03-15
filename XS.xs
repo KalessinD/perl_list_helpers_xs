@@ -7,35 +7,45 @@
 //#include <unistd.h>
 //#include <stdlib.h>
 
+inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize_t num) {
+
+    static SSize_t rand_index = 0;
+    SSize_t cur_index  = len;
+    static SV* a;
+    static SV* b;
+    static SV** ap;
+    static SV** bp;
+
+    while (cur_index > 1) {
+        rand_index = (cur_index + 1) * Drand01(); // rand() % cur_index;
+        ap = av_fetch(av,  cur_index, 0);
+        bp = av_fetch(av, rand_index, 0);
+        a = (ap ? sv_2mortal( newSVsv(*ap) ) : &PL_sv_undef);
+        b = (bp ? sv_2mortal( newSVsv(*bp) ) : &PL_sv_undef);
+        SvREFCNT_inc_simple_void(a);
+        SvREFCNT_inc_simple_void(b);
+
+        // if "av_store" returns NULL, the caller will have to decrement the reference count to avoid a memory leak
+        if (av_store(av,  cur_index, b) == NULL)
+            SvREFCNT_dec(b);
+        mg_set(b);
+
+        if (av_store(av, rand_index, a) == NULL)
+            SvREFCNT_dec(a);
+
+        mg_set(a);
+        cur_index--;
+    }
+}
+
 inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t num) {
 
-    SSize_t rand_index = 0;
-    SSize_t cur_index  = len;
-    SV* a;
-
     if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
-        SV* b;
-        SV** ap;
-        SV** bp;
-
-        while (cur_index > 1) {
-            rand_index = (cur_index + 1) * Drand01(); // rand() % cur_index;
-            ap = av_fetch(av,  cur_index, 0);
-            bp = av_fetch(av, rand_index, 0);
-            a = (ap ? sv_2mortal( newSVsv(*ap) ) : &PL_sv_undef);
-            b = (bp ? sv_2mortal( newSVsv(*bp) ) : &PL_sv_undef);
-            SvREFCNT_inc_simple_void(a);
-            SvREFCNT_inc_simple_void(b);
-            // if "av_store" returns NULL, the caller will have to decrement the reference count to avoid a memory leak
-            if (av_store(av,  cur_index, b) == NULL)
-                SvREFCNT_dec(b);
-            mg_set(b);
-            if (av_store(av, rand_index, a) == NULL)
-                SvREFCNT_dec(a);
-            mg_set(a);
-            cur_index--;
-        }
+        shuffle_tied_av_last_num_elements(av, len, num);
     } else {
+        static SV* a;
+        static SSize_t rand_index = 0;
+        SSize_t cur_index  = len;
         SV **pav = AvARRAY(av);
 
         while (cur_index > 1) {
@@ -60,16 +70,16 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
     }
     */
 
-    SSize_t rand_index = 0;
-    SSize_t cur_index  = 0;
-    SV* a;
+    static SSize_t rand_index = 0;
+    static SSize_t cur_index  = 0;
+    static SV* a;
 
     len++;
 
     if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
-        SV* b;
-        SV** ap;
-        SV** bp;
+        static SV* b;
+        static SV** ap;
+        static SV** bp;
 
         while (cur_index <= num) {
             rand_index = cur_index + (len - cur_index) * Drand01(); // rand() % cur_index;
