@@ -1,5 +1,8 @@
 Revision history for Perl extension List::Helpers::XS.
 
+0.04  Sun Feb 21
+    - som fixes in documentation
+
 0.03  Sun Feb 21
     - issues with tied arrays were fixed
 

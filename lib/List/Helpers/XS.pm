@@ -18,7 +18,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw//;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 require XSLoader;
 XSLoader::load('List::Helpers::XS', $VERSION);
@@ -33,26 +33,34 @@ List::Helpers::XS - Perl extension to provide some usefull functions with arrays
 
   use List::Helpers::XS qw/ :shuffle :slice /;
 
-  my @slice = random_slice(\@list, $size);
+  my $slice = random_slice(\@list, $size); # returns array reference
 
   random_slice_void(\@list, $size);
 
   shuffle(\@list);
   shuffle(@list);
 
+  # the same for tied arrays
+
+  tie(@list, "MyPackage");
+  shuffle(@list);
+  shuffle(\@list);
+  random_slice_void(\@list, $size);
+  my $slice = random_slice(\@list, $size); # returns array reference
+
 =head1 DESCRIPTION
 
 This module provides some rare but usefull functions to work with arrays.
+It supports tied arrays.
 
 =head2 random_slice
 
 This method receives an array and amount of required elements from it,
-shuffles array's elements and returns the C<num> elements from it.
+shuffles array's elements and returns the array reference to the new
+arrays with C<num> elements from original one.
 
 If C<num> is equal or higher than amount of elements in array, then
 it won't do any work.
-
-Otherwise the original array will be truncated down to C<num> elements.
 
 It doesn't shuffle the whole array, it shuffles only C<num> elements and returns only them.
 
