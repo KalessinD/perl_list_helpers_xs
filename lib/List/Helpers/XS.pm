@@ -54,7 +54,7 @@ it won't do any work.
 
 Otherwise the original array will be truncated down to C<num> elements.
 
-It doesn't shuffle the whole array, it shuffle only C<num> elements and returns only them.
+It doesn't shuffle the whole array, it shuffles only C<num> elements and returns only them.
 
 Also the original array will be shuffled at the end.
 
