@@ -90,8 +90,6 @@ undef($slice);
 
 # tied lists
 
-use Data::Dumper qw/ Dumper /;
-
 my @t_list;
 tie(@t_list, "Test::TiedArray");
 push(@t_list, ( 0 .. 9 ) );
@@ -102,8 +100,8 @@ is( scalar(@t_list), 10, "Checking the size of tied list after shuffling" );
 List::Helpers::XS::shuffle(@t_list);
 is( scalar(@t_list), 10, "Checking the size of tied list after shuffling" );
 
-#random_slice_void(\@t_list, 5);
-#is( scalar(@t_list), 5, "Checking the size of tied list after slicing in void context" );
+random_slice_void(\@t_list, 5);
+is( scalar(@t_list), 5, "Checking the size of tied list after slicing in void context" );
 
 push(@t_list, (11 .. 15));
 
