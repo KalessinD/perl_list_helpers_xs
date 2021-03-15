@@ -56,48 +56,60 @@
     Below you can find some benchmarks of "random_slice" and
     "random_slice_void" methods in comparison with
     "Array::Shuffle::shuffle_array" /
-    "Array::Shuffle::array_shuffle_huge_array" with "splice" method
+    "Array::Shuffle::shuffle_huge_array" with "splice" method
     invocation afterwards.
 
 Total amount of elements in initial array: 250
 ```
-Benchmark: timing 1000000 iterations of Array::Shuffle::shuffle_array, Array::Shuffle::shuffle_huge_array, List::Helpers::XS::random_slice, List::Helpers::XS::random_slice_void...
-                                         Rate Array::Shuffle::shuffle_huge_array Array::Shuffle::shuffle_array List::Helpers::XS::random_slice List::Helpers::XS::random_slice_void
-Array::Shuffle::shuffle_huge_array    94877/s                                 --                           -0%                            -38%                                 -44%
-Array::Shuffle::shuffle_array         94967/s                                 0%                            --                            -38%                                 -44%
-List::Helpers::XS::random_slice      152439/s                                61%                           61%                              --                                 -10%
-List::Helpers::XS::random_slice_void 168634/s                                78%                           78%                             11%                                   --
+                    Rate       shuffle_huge_array  random_slice  random_slice_void
+shuffle_huge_array  94967/s    --             -38%          -44%
+random_slice        152439/s   61%            --            -10%
+random_slice_void   168634/s   78%            11%           --
+ 
+ 
+                   Rate       shuffle_array  random_slice  random_slice_void
+shuffle_array      94877/s    --             -38%          -44%
+random_slice       152439/s   61%            --            -10%
+random_slice_void  168634/s   78%            11%           --
 ```
 
 Total amount of elements in initial array: 25_000
 
 ```
-Benchmark: timing 100000 iterations of Array::Shuffle::shuffle_array, Array::Shuffle::shuffle_huge_array, List::Helpers::XS::random_slice, List::Helpers::XS::random_slice_void...
-                                       Rate Array::Shuffle::shuffle_array Array::Shuffle::shuffle_huge_array List::Helpers::XS::random_slice_void List::Helpers::XS::random_slice
-Array::Shuffle::shuffle_array         994/s                            --                                -0%                                 -37%                            -42%
-Array::Shuffle::shuffle_huge_array    994/s                            0%                                 --                                 -37%                            -42%
-List::Helpers::XS::random_slice_void 1588/s                           60%                                60%                                   --                             -8%
-List::Helpers::XS::random_slice      1726/s                           74%                                74%                                   9%                              --
+                     Rate    shuffle_huge_array random_slice_void  random_slice
+shuffle_huge_array    994/s  --                 -37%               -42%
+random_slice_void    1588/s  60%                --                 -8%
+random_slice         1726/s  74%                9%                 --
+ 
+ 
+                     Rate    shuffle_array  random_slice_void  random_slice
+shuffle_array         994/s  --             -37%               -42%
+random_slice_void    1588/s  60%            --                 -8%
+random_slice         1726/s  74%            9%                 --
 ```
 
 Total amount of elements in initial array: 250_000
 
 ```
-Benchmark: timing 10000 iterations of Array::Shuffle::shuffle_array, Array::Shuffle::shuffle_huge_array, List::Helpers::XS::random_slice, List::Helpers::XS::random_slice_void...
-                                       Rate Array::Shuffle::shuffle_huge_array Array::Shuffle::shuffle_array List::Helpers::XS::random_slice_void List::Helpers::XS::random_slice
-Array::Shuffle::shuffle_huge_array   45.3/s                                 --                          -38%                                 -54%                            -59%
-Array::Shuffle::shuffle_array        73.6/s                                62%                            --                                 -25%                            -33%
-List::Helpers::XS::random_slice_void 97.8/s                               116%                           33%                                   --                            -11%
-List::Helpers::XS::random_slice       110/s                               144%                           50%                                  13%                              --
+                    Rate    shuffle_huge_array  random_slice_void  random_slice
+shuffle_huge_array  45.3/s  --                  -54%               -59%
+random_slice_void   97.8/s  116%                --                 -11%
+random_slice        110/s   144%                13%                --
+ 
+ 
+                    Rate    shuffle_array  random_slice_void  random_slice
+shuffle_array       73.6/s  --             -25%               -33%
+random_slice_void   97.8/s  33%            --                 -11%
+random_slice        110/s   50%            13%                --
 ```
 
 The same benchmark for "shuffle"
 
 ```
-                                      Rate Array::Shuffle::shuffle_array Array::Shuffle::shuffle_huge_array List::Helpers::XS
-Array::Shuffle::shuffle_array      56883/s                            --                                -0%               -2%
-Array::Shuffle::shuffle_huge_array 57078/s                            0%                                 --               -2%
-List::Helpers::XS                  58173/s                            2%                                 2%                --
+                    Rate     shuffle_array shuffle_huge_array  shuffle
+shuffle_array       56883/s  0%            -2%                 -2%
+shuffle_huge_array  57078/s  0%            --                  -2%
+shuffle             58173/s  2%            2%  
 ```
 
 ### AUTHOR
