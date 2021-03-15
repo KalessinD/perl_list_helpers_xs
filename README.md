@@ -62,9 +62,9 @@
 Total amount of elements in initial array: 250
 ```
                     Rate       shuffle_huge_array  random_slice  random_slice_void
-shuffle_huge_array  94967/s    --             -38%          -44%
-random_slice        152439/s   61%            --            -10%
-random_slice_void   168634/s   78%            11%           --
+shuffle_huge_array  94967/s    --                  -38%          -44%
+random_slice        152439/s   61%                 --            -10%
+random_slice_void   168634/s   78%                 11%           --
  
  
                    Rate       shuffle_array  random_slice  random_slice_void
