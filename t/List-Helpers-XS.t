@@ -102,17 +102,17 @@ is( scalar(@t_list), 10, "Checking the size of tied list after shuffling" );
 List::Helpers::XS::shuffle(@t_list);
 is( scalar(@t_list), 10, "Checking the size of tied list after shuffling" );
 
-random_slice_void(\@t_list, 5);
-is( scalar(@t_list), 5, "Checking the size of tied list after slicing in void context" );
+#random_slice_void(\@t_list, 5);
+#is( scalar(@t_list), 5, "Checking the size of tied list after slicing in void context" );
 
 push(@t_list, (11 .. 15));
 
-#my $t_slice = random_slice(\@t_list, 4);
-#is( scalar(@t_list), 10, "Checking the size of tied after slicing" );
-#is( scalar(@$slice), 4, "Checking the size of tied slice" );
+my $t_slice = random_slice(\@t_list, 4);
+is( scalar(@t_list), 15, "Checking the size of tied after slicing" );
+is( scalar(@$t_slice), 4, "Checking the size of tied slice" );
 
 undef(@t_list);
-#undef($t_slice);
+undef($t_slice);
 
 # check for memory leaks
 no_leaks_ok {

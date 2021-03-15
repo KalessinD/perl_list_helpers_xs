@@ -142,7 +142,20 @@ PPCODE:
 
             shuffle_av_first_num_elements(av, last_index, num);
 
-            AV *slice = av_make(num + 1, av_fetch(av, 0, 0));
+            AV *slice;
+
+            if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
+                SSize_t k = 0;
+                slice = newAV();
+                for (k = 0; k <= num; k++) {
+                    SV **svp = av_fetch(av,  k, 0);
+                    SV *sv = (svp ? newSVsv(*svp) : &PL_sv_undef);
+                    av_push(slice, sv);
+                    mg_set(sv);
+                }
+            }
+            else
+                slice = av_make(num + 1, av_fetch(av, 0, 0));
 
             ST(0) = sv_2mortal(newRV_noinc( (SV *) slice )); // mXPUSHs(newRV_noinc( (SV *) slice ));
         }
