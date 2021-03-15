@@ -22,8 +22,8 @@ inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t nu
             rand_index = (cur_index + 1) * Drand01(); // rand() % cur_index;
             ap = av_fetch(av,  cur_index, 0);
             bp = av_fetch(av, rand_index, 0);
-            a = (ap ? newSVsv(*ap) : &PL_sv_undef);
-            b = (bp ? newSVsv(*bp) : &PL_sv_undef);
+            a = (ap ? sv_2mortal( newSVsv(*ap) ) : &PL_sv_undef);
+            b = (bp ? sv_2mortal( newSVsv(*bp) ) : &PL_sv_undef);
             SvREFCNT_inc_simple_void(a);
             SvREFCNT_inc_simple_void(b);
             // if "av_store" returns NULL, the caller will have to decrement the reference count to avoid a memory leak
@@ -77,8 +77,8 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
             // SO, let's bump REFCNT then
             ap = av_fetch(av,  cur_index, 0);
             bp = av_fetch(av, rand_index, 0);
-            a = (ap ? newSVsv(*ap) : &PL_sv_undef);
-            b = (bp ? newSVsv(*bp) : &PL_sv_undef);
+            a = (ap ? sv_2mortal( newSVsv(*ap) ) : &PL_sv_undef);
+            b = (bp ? sv_2mortal( newSVsv(*bp) ) : &PL_sv_undef);
             SvREFCNT_inc_simple_void(b);
             SvREFCNT_inc_simple_void(a);
             //warn("cur_index = %i\trnd = %i\n", cur_index, rand_index);

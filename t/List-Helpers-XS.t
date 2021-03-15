@@ -133,12 +133,12 @@ no_leaks_ok {
     @t_list = ();
     tie(@t_list, "Test::TiedArray");
 
-    push(@t_list, ( 0 .. 3 ) );
+    push(@t_list, ( 0 .. 2 ) );
 
-    #shuffle(\@t_list);
-    #List::Helpers::XS::shuffle(@t_list);
+    shuffle(\@t_list);
+    List::Helpers::XS::shuffle(@t_list);
 
-    #random_slice_void(\@t_list, 2);
+    random_slice_void(\@t_list, 1);
 
     undef(@t_list);
 } 'no memory leaks';
