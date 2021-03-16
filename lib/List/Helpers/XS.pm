@@ -91,6 +91,8 @@ In this case please consider the usage of C<random_slice_void> method.
   Shuffles multiple arrays.
   Each array must be passed as array reference.
   All undefined arrays will be skipped.
+  This method will allow you to save some time by getting rid of extra calls.
+  You can pass so many arguments as Perl stack allows.
 
 =head1 Benchmarks
 
