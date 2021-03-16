@@ -84,6 +84,18 @@ my $slice = random_slice(\@list, 3);
 is( scalar(@list), 10, "Checking the list size after slicing" );
 is( scalar(@$slice), 3, "Checking the slice size" );
 
+my @list2 = (0..4);
+my @list3 = (20..27);
+my @list4 = (40..45);
+shuffle_multi(\@list2, undef, \@list3, \@list4);
+
+is( scalar(@list2), 5, "Checking the size of list2 after multi-array shuffling" );
+is( scalar(@list3), 8, "Checking the size of list3 after multi-array shuffling" );
+is( scalar(@list4), 6, "Checking the size of list4 after multi-array shuffling" );
+
+undef(@list2);
+undef(@list3);
+undef(@list4);
 undef(@list);
 undef($slice);
 
@@ -124,6 +136,11 @@ no_leaks_ok {
     @list = ( 0 .. 9 );
     
     $slice = random_slice_void(\@list, 5);
+
+    @list2 = (0..4);
+    @list3 = (20..27);
+    @list4 = (40..45);
+    shuffle_multi(\@list2, undef, \@list3, \@list4);
 
     # tied array
 

@@ -1,5 +1,8 @@
 Revision history for Perl extension List::Helpers::XS.
 
+0.06  Sun Mar 16
+    - add "shuffle_multi" method
+
 0.05  Sun Feb 21
     - some optimisations for tied arrays
 
