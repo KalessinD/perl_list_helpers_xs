@@ -15,6 +15,9 @@
   shuffle(\@list);
   shuffle(@list);
 
+  # undef value will be skipped
+  shuffle_multi(\@list1, \@list2, undef, \@list3);
+
   # the same for tied arrays
 
   tie(@list, "MyPackage");
@@ -59,6 +62,14 @@
 ##### shuflle
       Shuffles the provided array.
       Doesn't return anything.
+
+##### shuffle_multi
+
+  Shuffles multiple arrays.
+  Each array must be passed as array reference.
+  All undefined arrays will be skipped.
+  This method will allow you to save some time by getting rid of extra calls.
+  You can pass so many arguments as Perl stack allows.
 
 ### Benchmarks
     Below you can find some benchmarks of "random_slice" and

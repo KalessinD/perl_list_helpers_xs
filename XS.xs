@@ -221,29 +221,31 @@ PPCODE:
     XSRETURN_EMPTY;
 
 
-void shuffle_multi(...)
+void shuffle_multi(av, ...)
+    AV* av;
 PPCODE:
     static SSize_t i;
     static SSize_t len;
     SV* sv;
     SV *ref;
 
+    if (items == 0)
+        Perl_croak(pTHX_ "Wrong amoung of arguments");
+
     for (i = 0; i < items; i++) {
         sv = ST(i);
         if (!SvOK(sv)) // skip undefs
             continue;
-        if (!SvROK(sv))
+        if (!SvROK(sv)) // isn't a ref type
             croak_sv_is_not_an_arrayref(i);
         ref = SvRV(sv);
-        switch (SvTYPE(ref)) {
-            case SVt_PVAV: // $ref eq "ARRAY"
-                //av = (AV *) ref;
-                len = av_len( (AV *) ref );
-                shuffle_av_last_num_elements((AV *) ref, len, len);
-                break;
-            default:       // $ref ne "ARRAY"
-                croak_sv_is_not_an_arrayref(i);
+        if (SvTYPE(ref) == SVt_PVAV) { // $ref eq "ARRAY"
+            av = (AV *) ref;
+            len = av_len(av);
+            shuffle_av_last_num_elements(av, len, len);
         }
+        else // $ref ne "ARRAY"
+            croak_sv_is_not_an_arrayref(i);
     }
     // if (items < X) EXTEND(SP, X);
     XSRETURN_EMPTY;
