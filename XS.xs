@@ -231,7 +231,7 @@ PPCODE:
     SV *ref;
 
     if (items == 0)
-        Perl_croak(pTHX_ "Wrong amoung of arguments");
+        Perl_croak(pTHX_ "Wrong amount of arguments");
 
     for (i = 0; i < items; i++) {
         sv = ST(i);
