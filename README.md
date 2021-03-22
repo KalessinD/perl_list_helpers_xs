@@ -33,7 +33,7 @@
     It supports tied arrays.
 
 ##### random_slice
-    This method receives an array and amount of required elements from it,
+    This method receives the array and the amount of required elements to be shuffled,
     shuffles array's elements and returns the array reference to the new
     arrays with C<num> elements from original one.
 
@@ -46,30 +46,34 @@
     This method can a bit slow down in case of huge arrays and "num",
     because of it copies chosen elements into the new array to be returned
 
-    In this case please consider the usage of "random_slice_void" method.
+    In this case please consider the usage of "random_slice" method.
 
     Also the original array will be shuffled at the end.
 
 ##### random_slice_void
-    This method receives an array and amount of required elements from it,
-    shuffles array's elements. Doesn't return anything.
 
-    After method being called the passed array will contain only random
-    "num" elements from the original array.
+    This method receives the array and the amount of required elements to be shuffled,
+    shuffles array's elements and returns the array reference to the new
+    arrays with C<num> elements from original one.
 
-    This method is a memory efficient.
+    If "num" is equal or higher than amount of elements in array, then
+    it won't do any work.
+
+    It doesn't shuffle the whole array, it shuffles only C<num> elements and returns only them.
+    So, if you need to shuffle and get back only a part of array, then this method can be faster than others approaches.
+
+    Be aware that the original array will be shuffled too, but it won't be sliced.
 
 ##### shuflle
       Shuffles the provided array.
       Doesn't return anything.
 
 ##### shuffle_multi
-
-  Shuffles multiple arrays.
-  Each array must be passed as array reference.
-  All undefined arrays will be skipped.
-  This method will allow you to save some time by getting rid of extra calls.
-  You can pass so many arguments as Perl stack allows.
+    Shuffles multiple arrays.
+    Each array must be passed as array reference.
+    All undefined arrays will be skipped.
+    This method will allow you to save some time by getting rid of extra calls.
+    You can pass so many arguments as Perl stack allows.
 
 ### Benchmarks
     Below you can find some benchmarks of "random_slice" and
