@@ -150,16 +150,16 @@ The benchmark code is below:
 The benchmark results for C<shuffle> method
 
                             shuffle_huge_array  List::Helpers::XS::shuffle
-shuffle_huge_array                          --                         -4%
-List::Helpers::XS::shuffle                  4%                          --
+shuffle_huge_array                          --                         -7%
+List::Helpers::XS::shuffle                  7%                          --
 
                             shuffle_array  List::Helpers::XS::shuffle
-shuffle_array                                      --             -3%
-List::Helpers::XS::shuffle                          4%             --
+shuffle_array                                      --             -8%
+List::Helpers::XS::shuffle                          8%             --
 
                             List::Util::shuffle  List::Helpers::XS::shuffle
-List::Util::shuffle                          --                        -58%
-List::Helpers::XS::shuffle                  138%                         --
+List::Util::shuffle                          --                        -63%
+List::Helpers::XS::shuffle                  170%                         --
 
 =head1 AUTHOR
 
