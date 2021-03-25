@@ -59,6 +59,7 @@ package main;
 use utf8;
 use strict;
 use warnings;
+use Config ();
 
 use Test::LeakTrace qw/ no_leaks_ok /;
 use Test::More ('import' => [qw/ done_testing is ok use_ok /]);
@@ -108,26 +109,32 @@ undef(@list);
 undef($slice);
 
 # tied lists
-
+# we don't support tied arrays in Perl with threads
 my @t_list;
-tie(@t_list, "Test::TiedArray");
-push(@t_list, ( 0 .. 9 ) );
+my $config_args = $Config::Config{config_args} // '';
+my $t_slice;
 
-shuffle(\@t_list);
-is( scalar(@t_list), 10, "Checking the size of tied list after shuffling" );
-check_shuffled_array( [0 .. 9], \@t_list);
+if ($config_args !~ m/usethreads/) {
 
-List::Helpers::XS::shuffle(@t_list);
-is( scalar(@t_list), 10, "Checking the size of tied list after shuffling" );
+    tie(@t_list, "Test::TiedArray");
+    push(@t_list, ( 0 .. 9 ) );
 
-random_slice_void(\@t_list, 5);
-is( scalar(@t_list), 5, "Checking the size of tied list after slicing in void context" );
+    shuffle(\@t_list);
+    is( scalar(@t_list), 10, "Checking the size of tied list after shuffling" );
+    check_shuffled_array( [0 .. 9], \@t_list);
 
-push(@t_list, (11 .. 15));
+    List::Helpers::XS::shuffle(@t_list);
+    is( scalar(@t_list), 10, "Checking the size of tied list after shuffling" );
 
-my $t_slice = random_slice(\@t_list, 4);
-is( scalar(@t_list), 15, "Checking the size of tied after slicing" );
-is( scalar(@$t_slice), 4, "Checking the size of tied slice" );
+    random_slice_void(\@t_list, 5);
+    is( scalar(@t_list), 5, "Checking the size of tied list after slicing in void context" );
+
+    push(@t_list, (11 .. 15));
+
+    $t_slice = random_slice(\@t_list, 4);
+    is( scalar(@t_list), 15, "Checking the size of tied after slicing" );
+    is( scalar(@$t_slice), 4, "Checking the size of tied slice" );
+}
 
 undef(@t_list);
 undef($t_slice);
@@ -153,15 +160,17 @@ no_leaks_ok {
 
     # tied array
 
-    @t_list = ();
-    tie(@t_list, "Test::TiedArray");
+    if ($config_args !~ m/usethreads/) {
+        @t_list = ();
+        tie(@t_list, "Test::TiedArray");
 
-    push(@t_list, ( 0 .. 2 ) );
+        push(@t_list, ( 0 .. 2 ) );
 
-    shuffle(\@t_list);
-    List::Helpers::XS::shuffle(@t_list);
+        shuffle(\@t_list);
+        List::Helpers::XS::shuffle(@t_list);
 
-    random_slice_void(\@t_list, 1);
+        random_slice_void(\@t_list, 1);
+    }
 
     undef(@t_list);
 } 'no memory leaks';

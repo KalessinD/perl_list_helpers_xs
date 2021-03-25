@@ -5,14 +5,15 @@
 
 #include <sys/types.h>
 //#include <unistd.h>
-//#include <stdlib.h>
+#include <stdlib.h>
+
 
 inline static void croak_sv_is_not_an_arrayref (short int pos) {
     static char* pattern = "The argument at position %i isn't an array reference";
-    SV* msg = sv_2mortal( newSVpvf(pattern, pos) );
-    Perl_croak(pTHX_ (char *) SvPV_nolen( msg ));
+    croak(pattern, pos);
 }
 
+#ifndef USE_ITHREADS
 inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize_t num) {
 
     static SSize_t rand_index = 0;
@@ -23,7 +24,7 @@ inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize
     SV** bp;
 
     while (cur_index > 1) {
-        rand_index = (cur_index + 1) * Drand01(); // rand() % cur_index;
+		rand_index = rand() % cur_index; // (cur_index + 1) * Drand01();
         ap = av_fetch(av,  cur_index, 0);
         bp = av_fetch(av, rand_index, 0);
         a = (ap ? sv_2mortal( newSVsv(*ap) ) : &PL_sv_undef);
@@ -43,20 +44,25 @@ inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize
         cur_index--;
     }
 }
+#endif
 
 inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t num) {
 
     if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
+#ifdef USE_ITHREADS
+        croak("Tied arrays aren't supported in Perl compiled with thread support");
+#else
         shuffle_tied_av_last_num_elements(av, len, num);
+#endif
     } else {
         static SSize_t rand_index = 0;
         SSize_t cur_index  = len;
         SV **pav = AvARRAY(av);
         SV* a;
 
-        while (cur_index > 1) {
-            rand_index = (cur_index + 1) * Drand01(); // rand() % cur_index;
-            //warn("cur_index = %i\trnd = %i\n", cur_index, rand_index);
+        while (cur_index > 0) {
+			rand_index = rand() % cur_index; // (cur_index + 1) * Drand01();
+            //warn("cur_index = %i\trnd = %i\n", (int)cur_index, (int)rand_index);
             a = (SV*) pav[rand_index];
             pav[rand_index] = pav[cur_index];
             pav[cur_index] = a;
@@ -67,14 +73,12 @@ inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t nu
 
 inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t num) {
 
-    /*
     static short int is_rand_initialized = 0;
 
     if (is_rand_initialized == 0) {
         srand( (unsigned int) getpid() );
         is_rand_initialized = 1;
     }
-    */
 
     static SSize_t rand_index = 0;
     static SSize_t cur_index  = 0;
@@ -83,12 +87,16 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
     len++;
 
     if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
+#ifdef USE_ITHREADS
+		croak("Tied arrays aren't supported in Perl compiled with thread support");
+#else
         SV* b;
         SV** ap;
         SV** bp;
 
         while (cur_index <= num) {
-            rand_index = cur_index + (len - cur_index) * Drand01(); // rand() % cur_index;
+            rand_index = cur_index + rand() % (len - cur_index); // cur_index + (len - cur_index) * Drand01();
+
             // perlguts: Note the value so returned does not need to be deallocated, as it is already mortal.
             // SO, let's bump REFCNT then
             ap = av_fetch(av,  cur_index, 0);
@@ -111,12 +119,13 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
 
             cur_index++;
         }
+#endif
     } else {
         SV **pav = AvARRAY(av);
 
         while (cur_index <= num) {
-            rand_index = cur_index + (len - cur_index) * Drand01(); // rand() % (len - cur_index);
-            //warn("cur_index = %i\trnd = %i\n", cur_index, rand_index);
+			rand_index = cur_index + rand() % (len - cur_index); // cur_index + (len - cur_index) * Drand01();
+            //warn("cur_index = %i\trnd = %i\n", (int)cur_index, (int)rand_index);
             a = (SV*) pav[rand_index];
             pav[rand_index] = pav[cur_index];
             pav[cur_index] = a;
@@ -124,7 +133,6 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
         }
     }
 }
-
 
 MODULE = List::Helpers::XS      PACKAGE = List::Helpers::XS
 
@@ -144,7 +152,7 @@ AV* random_slice (av, num)
 PPCODE:
 
     if (num < 0)
-        Perl_croak(pTHX_ "The slice's size can't be less than 0");
+        croak("The slice's size can't be less than 0");
 
     if (num != 0) {
 
@@ -159,6 +167,8 @@ PPCODE:
             SV **svp;
             SV *sv;
 
+			shuffle_av_first_num_elements(av, last_index, num);
+
             if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
                 SSize_t k = 0;
                 slice = newAV();
@@ -169,11 +179,8 @@ PPCODE:
                     mg_set(sv);
                 }
             }
-            else {
-                shuffle_av_first_num_elements(av, last_index, num);
-
+            else
                 slice = av_make(num + 1, av_fetch(av, 0, 0));
-            }
 
             ST(0) = sv_2mortal(newRV_noinc( (SV *) slice )); // mXPUSHs(newRV_noinc( (SV *) slice ));
         }
@@ -188,7 +195,7 @@ void random_slice_void (av, num)
 PPCODE:
 
     if (num < 0)
-        Perl_croak(pTHX_ "The slice's size can't be less than 0");
+        croak("The slice's size can't be less than 0");
 
     if (num == 0) {
         av_fill(av, 0);
@@ -232,7 +239,7 @@ PPCODE:
     SV *ref;
 
     if (items == 0)
-        Perl_croak(pTHX_ "Wrong amount of arguments");
+        croak("Wrong amount of arguments");
 
     for (i = 0; i < items; i++) {
         sv = ST(i);
@@ -250,4 +257,5 @@ PPCODE:
             croak_sv_is_not_an_arrayref(i);
     }
     // if (items < X) EXTEND(SP, X);
+
     XSRETURN_EMPTY;
