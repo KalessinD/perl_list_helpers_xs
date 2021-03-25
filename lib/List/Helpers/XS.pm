@@ -56,6 +56,8 @@ List::Helpers::XS - Perl extension to provide some usefull functions with arrays
 This module provides some rare but usefull functions to work with arrays.
 It supports tied arrays.
 
+Be aware that this module doesn't support tied arrays for perl compiled with thread support.
+
 =head2 random_slice
 
 This method receives the array and the amount of required elements to be shuffled,
@@ -111,9 +113,9 @@ random_slice_void                               107%           14%              
 Total amount of elements in initial array: 25_000
 
                          shuffle_array and splice  random_slice_void  random_slice
-shuffle_array and splice                      --                -45%          -49%
-random_slice_void                             81%                 --           -8%
-random_slice                                  96%                 8%            --
+shuffle_array and splice                      --                -51%          -56%
+random_slice_void                            106%                 --           -9%
+random_slice                                 126%                10%            --
 
 Total amount of elements in initial array: 250_000
 
