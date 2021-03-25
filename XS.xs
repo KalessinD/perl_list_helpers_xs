@@ -25,6 +25,10 @@ inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize
 
     while (cur_index > 1) {
 		rand_index = rand() % cur_index; // (cur_index + 1) * Drand01();
+
+        if (rand_index == cur_index)
+            continue;
+
         ap = av_fetch(av,  cur_index, 0);
         bp = av_fetch(av, rand_index, 0);
         a = (ap ? sv_2mortal( newSVsv(*ap) ) : &PL_sv_undef);
@@ -39,8 +43,8 @@ inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize
 
         if (av_store(av, rand_index, a) == NULL)
             SvREFCNT_dec(a);
-
         mg_set(a);
+
         cur_index--;
     }
 }
@@ -63,6 +67,9 @@ inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t nu
         while (cur_index > 0) {
 			rand_index = rand() % cur_index; // (cur_index + 1) * Drand01();
             //warn("cur_index = %i\trnd = %i\n", (int)cur_index, (int)rand_index);
+            if (rand_index == cur_index)
+                continue;
+
             a = (SV*) pav[rand_index];
             pav[rand_index] = pav[cur_index];
             pav[cur_index] = a;
@@ -96,6 +103,8 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
 
         while (cur_index <= num) {
             rand_index = cur_index + rand() % (len - cur_index); // cur_index + (len - cur_index) * Drand01();
+            if (rand_index == cur_index)
+                continue;
 
             // perlguts: Note the value so returned does not need to be deallocated, as it is already mortal.
             // SO, let's bump REFCNT then
@@ -126,6 +135,9 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
         while (cur_index <= num) {
 			rand_index = cur_index + rand() % (len - cur_index); // cur_index + (len - cur_index) * Drand01();
             //warn("cur_index = %i\trnd = %i\n", (int)cur_index, (int)rand_index);
+            if (rand_index == cur_index)
+                continue;
+
             a = (SV*) pav[rand_index];
             pav[rand_index] = pav[cur_index];
             pav[cur_index] = a;
@@ -167,7 +179,8 @@ PPCODE:
             SV **svp;
             SV *sv;
 
-			shuffle_av_first_num_elements(av, last_index, num);
+            // shuffling for usual and tied arrays
+            shuffle_av_first_num_elements(av, last_index, num);
 
             if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
                 SSize_t k = 0;
