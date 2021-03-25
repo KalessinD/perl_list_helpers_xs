@@ -158,8 +158,8 @@ shuffle_array                                      --             -3%
 List::Helpers::XS::shuffle                          4%             --
 
                             List::Util::shuffle  List::Helpers::XS::shuffle
-List::Util::shuffle                          --                        -46%
-List::Helpers::XS::shuffle                   86%                         --
+List::Util::shuffle                          --                        -58%
+List::Helpers::XS::shuffle                  138%                         --
 
 =head1 AUTHOR
 

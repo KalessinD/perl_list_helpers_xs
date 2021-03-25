@@ -39,9 +39,6 @@ inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize
     while (cur_index > 1) {
 		rand_index = rand() % cur_index; // (cur_index + 1) * Drand01();
 
-        if (rand_index == cur_index)
-            continue;
-
         ap = av_fetch(av,  cur_index, 0);
         bp = av_fetch(av, rand_index, 0);
         a = (ap ? sv_2mortal( newSVsv(*ap) ) : &PL_sv_undef);
@@ -88,8 +85,6 @@ inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t nu
             rand_index = (cur_index + 1) * Drand01();
 #endif
             //warn("cur_index = %i\trnd = %i\n", (int)cur_index, (int)rand_index);
-            if (rand_index == cur_index)
-                continue;
 
             a = (SV*) pav[rand_index];
             pav[rand_index] = pav[cur_index];
@@ -122,8 +117,6 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
 
         while (cur_index <= num) {
             rand_index = cur_index + (len - cur_index) * Drand01(); // cur_index + rand() % (len - cur_index)
-            if (rand_index == cur_index)
-                continue;
 
             // perlguts: Note the value so returned does not need to be deallocated, as it is already mortal.
             // SO, let's bump REFCNT then
@@ -158,8 +151,6 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
             rand_index = cur_index + (len - cur_index) * Drand01();
 #endif
             //warn("cur_index = %i\trnd = %i\n", (int)cur_index, (int)rand_index);
-            if (rand_index == cur_index)
-                continue;
 
             a = (SV*) pav[rand_index];
             pav[rand_index] = pav[cur_index];

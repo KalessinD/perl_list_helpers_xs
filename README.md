@@ -144,7 +144,7 @@ List::Helpers::XS::shuffle                          4%             --
 
                             List::Util::shuffle  List::Helpers::XS::shuffle
 List::Util::shuffle                          --                        -46%
-List::Helpers::XS::shuffle                   86%                         --
+List::Helpers::XS::shuffle                 138%                         --
 ```
 
 ### AUTHOR
