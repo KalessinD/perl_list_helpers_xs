@@ -5,8 +5,21 @@
 
 #include <sys/types.h>
 //#include <unistd.h>
-#include <stdlib.h>
 
+
+#ifdef USE_ITHREADS
+#include <stdlib.h>
+static inline void srand_init (void) {
+    static short int is_rand_initialized = 0;
+    if (is_rand_initialized == 0) {
+        srand( (unsigned int) getpid() );
+        is_rand_initialized = 1;
+    }
+}
+inline void croak_perl_with_threads_support (void) {
+    croak("Tied arrays aren't supported in Perl compiled with threads support");
+}
+#endif
 
 inline static void croak_sv_is_not_an_arrayref (short int pos) {
     static char* pattern = "The argument at position %i isn't an array reference";
@@ -54,7 +67,7 @@ inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t nu
 
     if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
 #ifdef USE_ITHREADS
-        croak("Tied arrays aren't supported in Perl compiled with thread support");
+        croak_perl_with_threads_support();
 #else
         shuffle_tied_av_last_num_elements(av, len, num);
 #endif
@@ -64,8 +77,16 @@ inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t nu
         SV **pav = AvARRAY(av);
         SV* a;
 
-        while (cur_index > 0) {
-			rand_index = rand() % cur_index; // (cur_index + 1) * Drand01();
+#ifdef USE_ITHREADS
+        inline void srand_init();
+#endif
+
+        while (cur_index > 1) {
+#ifdef USE_ITHREADS
+			rand_index = rand() % cur_index;
+#else
+            rand_index = (cur_index + 1) * Drand01();
+#endif
             //warn("cur_index = %i\trnd = %i\n", (int)cur_index, (int)rand_index);
             if (rand_index == cur_index)
                 continue;
@@ -80,12 +101,6 @@ inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t nu
 
 inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t num) {
 
-    static short int is_rand_initialized = 0;
-
-    if (is_rand_initialized == 0) {
-        srand( (unsigned int) getpid() );
-        is_rand_initialized = 1;
-    }
 
     static SSize_t rand_index = 0;
     static SSize_t cur_index  = 0;
@@ -95,14 +110,18 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
 
     if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
 #ifdef USE_ITHREADS
-		croak("Tied arrays aren't supported in Perl compiled with thread support");
+        croak_perl_with_threads_support();
 #else
         SV* b;
         SV** ap;
         SV** bp;
 
+#ifdef USE_ITHREADS
+        inline void srand_init();
+#endif
+
         while (cur_index <= num) {
-            rand_index = cur_index + rand() % (len - cur_index); // cur_index + (len - cur_index) * Drand01();
+            rand_index = cur_index + (len - cur_index) * Drand01(); // cur_index + rand() % (len - cur_index)
             if (rand_index == cur_index)
                 continue;
 
@@ -133,7 +152,11 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
         SV **pav = AvARRAY(av);
 
         while (cur_index <= num) {
-			rand_index = cur_index + rand() % (len - cur_index); // cur_index + (len - cur_index) * Drand01();
+#ifdef USE_ITHREADS
+            rand_index = cur_index + rand() % (len - cur_index);
+#else
+            rand_index = cur_index + (len - cur_index) * Drand01();
+#endif
             //warn("cur_index = %i\trnd = %i\n", (int)cur_index, (int)rand_index);
             if (rand_index == cur_index)
                 continue;
