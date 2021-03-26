@@ -64,13 +64,16 @@ use warnings;
 # if ($config_args !~ m/usethreads/) {
 
 use Test::LeakTrace qw/ no_leaks_ok /;
-use Test::More ('import' => [qw/ done_testing is ok use_ok /]);
+use Test::More ('import' => [qw/ done_testing is ok use_ok fail /]);
 
 BEGIN { use_ok('List::Helpers::XS') };
 
 List::Helpers::XS->import(':all');
 
 sub check_shuffled_array;
+sub check_even_distribution;
+
+check_even_distribution();
 
 my @list = ( 0 .. 9 );
 
@@ -187,6 +190,32 @@ sub check_shuffled_array {
         }
     }
     ok($is_shuffled, "Checking that array is shuffled");
+}
+
+sub check_even_distribution {
+
+    my $cnt = 1_000_000;
+    my @stat;
+    for(1 .. $cnt) {
+        my $arr = [0..9];
+        shuffle($arr);
+        for my $i (0 .. 9) {
+            $stat[ $i ]->[ $arr->[ $i ] ]++;
+        }
+    }
+
+    CHECK_EVEN_DISTRIBUTION:
+    for my $i (0 .. 9) {
+        for my $value (0 .. 9) {
+            my $share = $stat[ $i ]->[ $value ] / $cnt;
+            if ($share == 0) {
+                fail("Failed to check even distribution");
+                last CHECK_EVEN_DISTRIBUTION;
+            }
+            #printf "%.2f;", ($stat[ $pos ]->[ $digit ] / $cnt) * 100;
+        }
+        #print "\n";
+    }
 }
 
 1;
