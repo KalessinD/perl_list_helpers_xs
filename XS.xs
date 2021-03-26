@@ -1,5 +1,6 @@
 //#define PERL_NO_GET_CONTEXT
 
+// PERL_NO_GET_CONTEXT is not used here, so it's OK to define it after inculding these files
 #include "EXTERN.h"
 #include "perl.h"
 

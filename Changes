@@ -1,5 +1,9 @@
 Revision history for Perl extension List::Helpers::XS.
 
+0.14  Mon Mar 26
+    - added full support of Perl versiuons with threds;
+    - fixed issue with even element shuffling at first position of array (bug report and test by Dmitriy Novozhilov)
+
 0.13  Mon Mar 25
     - fix issues with compilation in Perl with thread support
 

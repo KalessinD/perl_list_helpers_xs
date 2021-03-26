@@ -32,8 +32,6 @@
     arrays.
     It supports tied arrays.
 
-    Be aware that this module doesn't support tied arrays for perl compiled with thread support
-
 ##### random_slice
     This method receives the array and the amount of required elements to be shuffled,
     shuffles array's elements and returns the array reference to the new
