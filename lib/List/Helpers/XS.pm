@@ -18,7 +18,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw//;
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 require XSLoader;
 XSLoader::load('List::Helpers::XS', $VERSION);
@@ -55,8 +55,6 @@ List::Helpers::XS - Perl extension to provide some usefull functions with arrays
 
 This module provides some rare but usefull functions to work with arrays.
 It supports tied arrays.
-
-Be aware that this module doesn't support tied arrays for perl compiled with thread support.
 
 =head2 random_slice
 
