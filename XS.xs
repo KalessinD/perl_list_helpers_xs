@@ -4,19 +4,19 @@
 #include "XSUB.h"
 
 #include <sys/types.h>
-//#include <unistd.h>
+
+
+#ifdef USE_ITHREADS
 #include <stdlib.h>
-
-
+#include <unistd.h>
+#include <time.h>
+static short int is_rand_initialized = 0;
 static inline void srand_init (void) {
-    static short int is_rand_initialized = 0;
     if (is_rand_initialized == 0) {
-        srand( (unsigned int) getpid() );
+        srand( (unsigned int) getpid() +  time(NULL) );
         is_rand_initialized = 1;
     }
 }
-
-#ifdef USE_ITHREADS
 inline void croak_perl_with_threads_support (void) {
     croak("Tied arrays aren't supported in Perl compiled with threads support");
 }
@@ -75,10 +75,16 @@ inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t nu
         SV **pav = AvARRAY(av);
         SV* a;
 
+#ifdef USE_ITHREADS
         inline void srand_init();
+#endif
 
-        while (cur_index > 1) {
-			rand_index = rand() % cur_index; // (cur_index + 1) * Drand01();
+        while (cur_index >= 0) {
+#ifdef USE_ITHREADS
+			rand_index = rand() % (cur_index + 1); // (cur_index + 1) * Drand01();
+#else
+            rand_index = (cur_index + 1) * Drand01();
+#endif
             //warn("cur_index = %i\trnd = %i\n", (int)cur_index, (int)rand_index);
 
             a = (SV*) pav[rand_index];
@@ -106,7 +112,9 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
         SV** ap;
         SV** bp;
 
+#ifdef USE_ITHREADS
         inline void srand_init();
+#endif
 
         while (cur_index <= num) {
             rand_index = cur_index + (len - cur_index) * Drand01(); // cur_index + rand() % (len - cur_index)
@@ -138,7 +146,11 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
         SV **pav = AvARRAY(av);
 
         while (cur_index <= num) {
-            rand_index = cur_index + rand() % (len - cur_index); // cur_index + (len - cur_index) * Drand01();
+#ifdef USE_ITHREADS
+            rand_index = cur_index + rand() % (len - cur_index);
+#else
+            rand_index = cur_index + (len - cur_index) * Drand01();
+#endif
             //warn("cur_index = %i\trnd = %i\n", (int)cur_index, (int)rand_index);
 
             a = (SV*) pav[rand_index];
