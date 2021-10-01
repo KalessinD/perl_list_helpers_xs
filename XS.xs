@@ -40,13 +40,15 @@
 
 #include <utility>
 
-static void call_srand_if_required (void) {
+/*
+inline static void call_srand_if_required (void) {
     //#if (PERL_VERSION >= 9)
     if(!PL_srand_called) {
         (void)seedDrand01((Rand_seed_t)Perl_seed(aTHX));
         PL_srand_called = TRUE;
     }
 }
+*/
 
 inline static void croak_sv_is_not_an_arrayref (short int pos) {
     static const char* pattern = "The argument at position %i isn't an array reference";
@@ -119,7 +121,7 @@ inline static void shuffle_tied_av_first_num_elements (AV *av, SSize_t len, SSiz
 
 inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t num) {
 
-    call_srand_if_required();
+    //call_srand_if_required();
 
     if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
         shuffle_tied_av_last_num_elements(av, len, num);
@@ -144,7 +146,7 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
 
     len++;
 
-    call_srand_if_required();
+    //call_srand_if_required();
 
     if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
         shuffle_tied_av_first_num_elements(av, len, num);
