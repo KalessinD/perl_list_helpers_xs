@@ -1,5 +1,8 @@
 Revision history for Perl extension List::Helpers::XS.
 
+0.17  2021 Oct 1
+    - some refactoring
+
 0.16  2021 Jun 4
     - use std::move to swap elements
 

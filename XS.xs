@@ -49,11 +49,9 @@ inline static void croak_sv_is_not_an_arrayref (short int pos) {
 inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize_t num) {
 
     static SSize_t rand_index = 0;
-    SSize_t cur_index  = len;
-    SV* a;
-    SV* b;
-    SV** ap;
-    SV** bp;
+    static SSize_t cur_index  = len;
+    SV *a, *b;
+    SV **ap, **bp;
 
     while (cur_index > 1) {
 		rand_index = rand() % cur_index; // (cur_index + 1) * Drand01();
@@ -78,6 +76,39 @@ inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize
     }
 }
 
+inline static void shuffle_tied_av_first_num_elements (AV *av, SSize_t len, SSize_t num) {
+
+    static SSize_t rand_index = 0;
+    static SSize_t cur_index  = 0;
+    SV *a, *b;
+    SV **ap, **bp;
+
+    while (cur_index <= num) {
+        rand_index = cur_index + (len - cur_index) * Drand01(); // cur_index + rand() % (len - cur_index)
+
+        // perlguts: Note the value so returned does not need to be deallocated, as it is already mortal.
+        // SO, let's bump REFCNT then
+        ap = av_fetch(av,  cur_index, 0);
+        bp = av_fetch(av, rand_index, 0);
+        a = (ap ? sv_2mortal( newSVsv(*ap) ) : &PL_sv_undef);
+        b = (bp ? sv_2mortal( newSVsv(*bp) ) : &PL_sv_undef);
+        SvREFCNT_inc_simple_void(b);
+        SvREFCNT_inc_simple_void(a);
+        //warn("cur_index = %i\trnd = %i\n", cur_index, rand_index);
+
+        // [MAYCHANGE] After a call to "av_store" on a tied array, the caller will usually
+        // need to call "mg_set(val)" to actually invoke the perl level "STORE" method on the TIEARRAY object.
+        if (av_store(av,  cur_index, b) == NULL)
+                SvREFCNT_dec(b);
+        mg_set(b);
+
+        if (av_store(av, rand_index, a) == NULL)
+            SvREFCNT_dec(a);
+        mg_set(a);
+
+        cur_index++;
+    }
+}
 
 inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t num) {
 
@@ -102,43 +133,14 @@ inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t nu
 
 inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t num) {
 
-    static SSize_t rand_index = 0;
-    static SSize_t cur_index  = 0;
-    SV* a;
-
     len++;
 
     if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
-        SV* b;
-        SV** ap;
-        SV** bp;
-
-        while (cur_index <= num) {
-            rand_index = cur_index + (len - cur_index) * Drand01(); // cur_index + rand() % (len - cur_index)
-
-            // perlguts: Note the value so returned does not need to be deallocated, as it is already mortal.
-            // SO, let's bump REFCNT then
-            ap = av_fetch(av,  cur_index, 0);
-            bp = av_fetch(av, rand_index, 0);
-            a = (ap ? sv_2mortal( newSVsv(*ap) ) : &PL_sv_undef);
-            b = (bp ? sv_2mortal( newSVsv(*bp) ) : &PL_sv_undef);
-            SvREFCNT_inc_simple_void(b);
-            SvREFCNT_inc_simple_void(a);
-            //warn("cur_index = %i\trnd = %i\n", cur_index, rand_index);
-
-            // [MAYCHANGE] After a call to "av_store" on a tied array, the caller will usually
-            // need to call "mg_set(val)" to actually invoke the perl level "STORE" method on the TIEARRAY object.
-            if (av_store(av,  cur_index, b) == NULL)
-                SvREFCNT_dec(b);
-            mg_set(b);
-
-            if (av_store(av, rand_index, a) == NULL)
-                SvREFCNT_dec(a);
-            mg_set(a);
-
-            cur_index++;
-        }
+        shuffle_tied_av_first_num_elements(av, len, num);
     } else {
+        static SSize_t rand_index = 0;
+        static SSize_t cur_index  = 0;
+        SV* a;
         SV **pav = AvARRAY(av);
 
         while (cur_index <= num) {
