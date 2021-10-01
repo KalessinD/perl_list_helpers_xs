@@ -58,7 +58,7 @@ inline static void croak_sv_is_not_an_arrayref (short int pos) {
 inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize_t num) {
 
     static SSize_t rand_index = 0;
-    static SSize_t cur_index  = len;
+    SSize_t cur_index  = len;
     SV *a, *b;
     SV **ap, **bp;
 
@@ -88,7 +88,7 @@ inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize
 inline static void shuffle_tied_av_first_num_elements (AV *av, SSize_t len, SSize_t num) {
 
     static SSize_t rand_index = 0;
-    static SSize_t cur_index  = 0;
+    SSize_t cur_index  = 0;
     SV *a, *b;
     SV **ap, **bp;
 
@@ -152,7 +152,7 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
         shuffle_tied_av_first_num_elements(av, len, num);
     } else {
         static SSize_t rand_index = 0;
-        static SSize_t cur_index  = 0;
+        SSize_t cur_index  = 0;
         SV* a;
         SV **pav = AvARRAY(av);
 
