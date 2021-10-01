@@ -210,7 +210,7 @@ PPCODE:
             shuffle_av_first_num_elements(av, last_index, num);
 
             if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
-                SSize_t k = 0;
+                static SSize_t k;
                 slice = newAV();
                 for (k = 0; k <= num; k++) {
                     svp = av_fetch(av,  k, 0);
