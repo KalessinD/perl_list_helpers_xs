@@ -1,6 +1,7 @@
 Revision history for Perl extension List::Helpers::XS.
 
 0.17  2021 Oct 1
+    - fix a bug when "random_slice" could return the same result for one array
     - some refactoring
 
 0.16  2021 Jun 4
