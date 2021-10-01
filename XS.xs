@@ -194,8 +194,9 @@ PPCODE:
 
     if (num != 0) {
 
-        SSize_t last_index = av_top_index(av);
+        static SSize_t last_index;
 
+        last_index = std::move(av_top_index(av));
         num -= 1;
 
         if (num < last_index) {
