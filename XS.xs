@@ -63,7 +63,7 @@ inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize
 
     cur_index = std::move(len);
 
-    while (cur_index >= 0) {
+    while (cur_index >= 1) {
 		rand_index = rand() % cur_index; // (cur_index + 1) * Drand01();
 
         ap = av_fetch(av,  cur_index, 0);
