@@ -57,12 +57,13 @@ inline static void croak_sv_is_not_an_arrayref (short int pos) {
 
 inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize_t num) {
 
-    static SSize_t rand_index = 0;
-    SSize_t cur_index  = len;
+    static SSize_t rand_index, cur_index;
     SV *a, *b;
     SV **ap, **bp;
 
-    while (cur_index > 1) {
+    cur_index = std::move(len);
+
+    while (cur_index >= 0) {
 		rand_index = rand() % cur_index; // (cur_index + 1) * Drand01();
 
         ap = av_fetch(av,  cur_index, 0);
@@ -87,10 +88,11 @@ inline static void shuffle_tied_av_last_num_elements (AV *av, SSize_t len, SSize
 
 inline static void shuffle_tied_av_first_num_elements (AV *av, SSize_t len, SSize_t num) {
 
-    static SSize_t rand_index = 0;
-    SSize_t cur_index  = 0;
+    static SSize_t rand_index, cur_index;
     SV *a, *b;
     SV **ap, **bp;
+
+    cur_index = 0;
 
     while (cur_index <= num) {
         rand_index = cur_index + (len - cur_index) * Drand01(); // cur_index + rand() % (len - cur_index)
@@ -126,10 +128,11 @@ inline static void shuffle_av_last_num_elements (AV *av, SSize_t len, SSize_t nu
     if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
         shuffle_tied_av_last_num_elements(av, len, num);
     } else {
-        static SSize_t rand_index = 0;
-        SSize_t cur_index  = len;
+        static SSize_t rand_index, cur_index;
         SV **pav = AvARRAY(av);
         SV* a;
+
+        cur_index = std::move(len);
 
         while (cur_index >= 0) {
             rand_index = (cur_index + 1) * Drand01(); // rand() % (cur_index + 1);
@@ -151,10 +154,11 @@ inline static void shuffle_av_first_num_elements (AV *av, SSize_t len, SSize_t n
     if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
         shuffle_tied_av_first_num_elements(av, len, num);
     } else {
-        static SSize_t rand_index = 0;
-        SSize_t cur_index  = 0;
+        static SSize_t rand_index, cur_index;
         SV* a;
         SV **pav = AvARRAY(av);
+
+        cur_index = 0;
 
         while (cur_index <= num) {
             rand_index = cur_index + (len - cur_index) * Drand01(); // cur_index + rand() % (len - cur_index);
@@ -237,8 +241,9 @@ PPCODE:
     }
     else {
 
-        SSize_t last_index = av_top_index(av);
+        static SSize_t last_index;
 
+        last_index = std::move(av_top_index(av));
         num -= 1;
 
         if (num < last_index) {
