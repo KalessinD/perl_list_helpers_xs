@@ -183,6 +183,49 @@ BOOT:
     sv_setpv((SV*)GvCV(gv_fetchpvs("List::Helpers::XS::shuffle", 0, SVt_PVCV)), "\\@");
 #endif
 
+AV* random_slice_old (av, num)
+    AV* av
+    IV num
+PPCODE:
+
+    if (num < 0)
+        croak("The slice's size can't be less than 0");
+
+    if (num != 0) {
+
+        SSize_t last_index = av_top_index(av);
+
+        num -= 1;
+
+        if (num < last_index) {
+
+            SSize_t cur_index;
+            AV *slice;
+            SV **svp;
+            SV *sv;
+
+            // shuffling for usual and tied arrays
+            shuffle_av_first_num_elements(av, last_index, num);
+
+            if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
+                SSize_t k = 0;
+                slice = newAV();
+                for (k = 0; k <= num; k++) {
+                    svp = av_fetch(av,  k, 0);
+                    sv = (svp ? newSVsv(*svp) : &PL_sv_undef);
+                    av_push(slice, sv);
+                    mg_set(sv);
+                }
+            }
+            else
+                slice = av_make(num + 1, av_fetch(av, 0, 0));
+
+            ST(0) = sv_2mortal(newRV_noinc( (SV *) slice )); // mXPUSHs(newRV_noinc( (SV *) slice ));
+        }
+    }
+
+    XSRETURN(1);
+    //XSRETURN_EMPTY;
 
 AV* random_slice (av, num)
     AV* av

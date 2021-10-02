@@ -10,7 +10,7 @@ our @ISA = qw(Exporter);
 
 our %EXPORT_TAGS = (
   'all' => [ qw/ shuffle_multi shuffle random_slice / ],
-  'slice' => [ qw/ random_slice / ],
+  'slice' => [ qw/ random_slice random_slice_old/ ],
   'shuffle' => [ qw/ shuffle shuffle_multi / ],
 );
 
