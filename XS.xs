@@ -216,6 +216,10 @@ PPCODE:
                     mg_set(sv);
                 }
             }
+            else if (GIMME_V == G_VOID) {
+                av_fill(av, num);
+                XSRETURN_EMPTY;
+            }
             else
                 slice = av_make(num + 1, av_fetch(av, 0, 0));
 

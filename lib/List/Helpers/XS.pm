@@ -33,7 +33,9 @@ List::Helpers::XS - Perl extension to provide some usefull functions with arrays
 
   use List::Helpers::XS qw/ :shuffle :slice /;
 
-  my $slice = random_slice(\@list, $size); # returns array reference
+  my $slice = random_slice(\@list, $size); # returns array reference, @list is partitial shuffled
+
+  random_slice(\@list, $size); # @list is now truncated and shuffled
 
   shuffle(\@list);
   shuffle(@list);
@@ -67,6 +69,8 @@ So, if you need to shuffle and get back only a part of array, then this method c
 
 Be aware that the original array will be shuffled too, but it won't be sliced.
 
+In void context the original list will be truncated and shuffled.
+
 =head2 shuflle
 
 Shuffles the provided array.
@@ -89,31 +93,31 @@ with C<splice> method invocation afterwards.
 Total amount of elements in initial array: 250
 
                            Rate shuffle and splice List::Util::sample List::MoreUtils::samples random_slice
-shuffle and splice       70.0/s                 --               -61%                     -62%         -63%
-List::Util::sample        178/s               154%                 --                      -3%          -5%
-List::MoreUtils::samples  184/s               163%                 3%                       --          -2%
-random_slice              188/s               168%                 5%                       2%           --
+shuffle and splice       70.4/s                 --               -61%                     -62%         -66%
+List::Util::sample        179/s               154%                 --                      -4%         -14%
+List::MoreUtils::samples  186/s               164%                 4%                       --         -11%
+random_slice              208/s               196%                17%                      12%           --
 
 Total amount of elements in initial array: 25_000
 
-                           Rate shuffle and splice List::Util::sample List::MoreUtils::samples random_slice
-shuffle and splice       70.3/s                 --               -62%                     -62%         -62%
-List::Util::sample        183/s               160%                 --                      -0%          -1%
-List::MoreUtils::samples  184/s               162%                 0%                       --          -1%
-random_slice              186/s               164%                 1%                       1%           --
+                           Rate shuffle and splice List::MoreUtils::samples List::Util::sample random_slice
+shuffle and splice       71.4/s                 --                     -61%               -61%         -63%
+List::MoreUtils::samples  184/s               158%                       --                -1%          -4%
+List::Util::sample        185/s               160%                       1%                 --          -3%
+random_slice              191/s               168%                       4%                 3%           --
 
 Total amount of elements in initial array: 250_000
 
-                           Rate shuffle and splice List::MoreUtils::samples List::Util::sample random_slice
-shuffle and splice       69.9/s                 --                     -62%               -62%         -63%
-List::MoreUtils::samples  183/s               161%                       --                -1%          -3%
-List::Util::sample        184/s               163%                       1%                 --          -2%
-random_slice              189/s               170%                       3%                 2%           --
+                           Rate shuffle and splice List::Util::sample List::MoreUtils::samples random_slice
+shuffle and splice       69.7/s                 --               -62%                     -62%         -63%
+List::Util::sample        184/s               163%                 --                      -0%          -1%
+List::MoreUtils::samples  184/s               164%                 0%                       --          -1%
+random_slice              186/s               167%                 1%                       1%           --
 
 The benchmark code is below:
 
   cmpthese timethese(
-      1_00_000,
+      100_000,
       {
           'shuffle and splice' => sub {
               my $arr = [@array];
@@ -136,6 +140,9 @@ The benchmark code is below:
           },
       }
   );
+
+You can see some perfomance degradation for large arrays and amoutn of loops.
+So in some cases it can be better to use other methods.
 
 The benchmark results for C<shuffle> method
 
