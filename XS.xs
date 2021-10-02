@@ -200,41 +200,31 @@ PPCODE:
 
         if (num < last_index) {
 
-            static SSize_t rand_index, cur_index, len;
-            AV *slice = newAV();
+            AV *slice;
 
-            len = last_index + 1;
-            cur_index = 0;
+            // shuffling for usual and tied arrays
+            shuffle_av_first_num_elements(av, last_index, num);
 
             if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
-
+                static SSize_t k;
                 SV *sv, **svp;
-
-                while (cur_index <= num) {
-                    rand_index = cur_index + (len - cur_index) * Drand01();
-                    svp = av_fetch(av, rand_index, 0);
+                slice = newAV();
+                for (k = 0; k <= num; k++) {
+                    svp = av_fetch(av,  k, 0);
                     sv = (svp ? newSVsv(*svp) : &PL_sv_undef);
-                    av_push(slice, SvREFCNT_inc_simple(sv));
+                    av_push(slice, sv);
                     mg_set(sv);
-                    cur_index++;
                 }
             }
-            else {
-
-                SV **pav = AvARRAY(av);
-
-                while (cur_index <= num) {
-                    rand_index = cur_index + (len - cur_index) * Drand01();
-                    av_push(slice, SvREFCNT_inc_simple(pav[rand_index]));
-                    cur_index++;
-                }
-            }
+            else
+                slice = av_make(num + 1, av_fetch(av, 0, 0));
 
             ST(0) = sv_2mortal(newRV_noinc( (SV *) slice )); // mXPUSHs(newRV_noinc( (SV *) slice ));
         }
     }
 
     XSRETURN(1);
+
 
 void shuffle (av)
     AV *av
