@@ -201,66 +201,41 @@ PPCODE:
 
         if (num < last_index) {
 
-            SSize_t cur_index;
-            AV *slice;
-            SV **svp;
-            SV *sv;
+            static SSize_t rand_index, cur_index, len;
+            AV *slice = newAV();
 
-            // shuffling for usual and tied arrays
-            shuffle_av_first_num_elements(av, last_index, num);
+            len = last_index + 1;
+            cur_index = 0;
 
             if (SvTIED_mg((SV *)av, PERL_MAGIC_tied)) {
-                static SSize_t k;
-                slice = newAV();
-                for (k = 0; k <= num; k++) {
-                    svp = av_fetch(av,  k, 0);
+
+                SV *sv, **svp;
+
+                while (cur_index <= num) {
+                    rand_index = cur_index + (len - cur_index) * Drand01();
+                    svp = av_fetch(av, rand_index, 0);
                     sv = (svp ? newSVsv(*svp) : &PL_sv_undef);
-                    av_push(slice, sv);
+                    av_push(slice, SvREFCNT_inc_simple(sv));
                     mg_set(sv);
+                    cur_index++;
                 }
             }
-            else
-                slice = av_make(num + 1, av_fetch(av, 0, 0));
+            else {
+
+                SV **pav = AvARRAY(av);
+
+                while (cur_index <= num) {
+                    rand_index = cur_index + (len - cur_index) * Drand01();
+                    av_push(slice, SvREFCNT_inc_simple(pav[rand_index]));
+                    cur_index++;
+                }
+            }
 
             ST(0) = sv_2mortal(newRV_noinc( (SV *) slice )); // mXPUSHs(newRV_noinc( (SV *) slice ));
         }
     }
 
     XSRETURN(1);
-
-
-void random_slice_void (av, num)
-    AV* av
-    IV num
-PPCODE:
-
-    if (num < 0)
-        croak("The slice's size can't be less than 0");
-
-    if (num == 0) {
-        av_fill(av, 0);
-    }
-    else {
-
-        static SSize_t last_index;
-
-        last_index = std::move(av_top_index(av));
-        num -= 1;
-
-        if (num < last_index) {
-            shuffle_av_first_num_elements(av, last_index, num);
-            av_fill(av, num);
-        }
-
-        // If "flags" equals "G_DISCARD", the element is freed and NULL is returned.
-        // But it's more slower than "av_fill"
-        // for (cur_index = last_index; cur_index > num; cur_index--)
-            // av_delete(av, cur_index, G_DISCARD); // a = av_delete(av, cur_index); SvREFCNT_dec(a)
-            // SvREFCNT_dec( av_pop(av) );
-    }
-
-    XSRETURN_EMPTY;
-
 
 void shuffle (av)
     AV *av
