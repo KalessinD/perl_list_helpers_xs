@@ -10,7 +10,7 @@ our @ISA = qw(Exporter);
 
 our %EXPORT_TAGS = (
   'all' => [ qw/ shuffle_multi shuffle random_slice / ],
-  'slice' => [ qw/ random_slice random_slice_void / ],
+  'slice' => [ qw/ random_slice / ],
   'shuffle' => [ qw/ shuffle shuffle_multi / ],
 );
 
@@ -82,7 +82,7 @@ You can pass so many arguments as Perl stack allows.
 
 =head1 Benchmarks
 
-Below you can find some benchmarks of C<random_slice> and C<random_slice_void> methods
+Below you can find some benchmarks of C<random_slice> method
 in comparison with C<Array::Shuffle::shuffle_array> / C<Array::Shuffle::shuffle_huge_array>
 with C<splice> method invocation afterwards.
 
