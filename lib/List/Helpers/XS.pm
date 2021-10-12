@@ -86,63 +86,13 @@ You can pass so many arguments as Perl stack allows.
 
 =head1 Benchmarks
 
-Below you can find some benchmarks of C<random_slice> method
-in comparison with C<Array::Shuffle::shuffle_array> / C<Array::Shuffle::shuffle_huge_array>
-with C<splice> method invocation afterwards.
+Benchmarks of C<random_slice> method in comparison with C<List::MoreUtils::samples> and
+C<List::Util::sample> showed that current version of C<random_slice> is very similar to
+the first ones in case cases. But in case of huge amount of iterations it starts to slow
+down due to some performance degradation.
 
-Total amount of elements in initial array: 250
-
-                           Rate shuffle and splice List::Util::sample List::MoreUtils::samples random_slice
-shuffle and splice       70.4/s                 --               -61%                     -62%         -66%
-List::Util::sample        179/s               154%                 --                      -4%         -14%
-List::MoreUtils::samples  186/s               164%                 4%                       --         -11%
-random_slice              208/s               196%                17%                      12%           --
-
-Total amount of elements in initial array: 25_000
-
-                           Rate shuffle and splice List::MoreUtils::samples List::Util::sample random_slice
-shuffle and splice       71.4/s                 --                     -61%               -61%         -63%
-List::MoreUtils::samples  184/s               158%                       --                -1%          -4%
-List::Util::sample        185/s               160%                       1%                 --          -3%
-random_slice              191/s               168%                       4%                 3%           --
-
-Total amount of elements in initial array: 250_000
-
-                           Rate shuffle and splice List::Util::sample List::MoreUtils::samples random_slice
-shuffle and splice       69.7/s                 --               -62%                     -62%         -63%
-List::Util::sample        184/s               163%                 --                      -0%          -1%
-List::MoreUtils::samples  184/s               164%                 0%                       --          -1%
-random_slice              186/s               167%                 1%                       1%           --
-
-The benchmark code is below:
-
-  cmpthese timethese(
-      100_000,
-      {
-          'shuffle and splice' => sub {
-              my $arr = [@array];
-              if ($slice_size < scalar $arr->@*) {
-                  shuffle_array(@$arr);
-                  @$arr = splice(@$arr, 0, $slice_size);
-              }
-          },
-          'random_slice' => sub {
-              my $arr = [@array];
-              $arr = random_slice($arr, $slice_size);
-          },
-          'List::MoreUtils::samples' => sub {
-              my $arr = [@array];
-              @$arr = List::MoreUtils::samples($slice_size, @$arr);
-          },
-          'List::Util::sample' => sub {
-              my $arr = [@array];
-              @$arr = List::Util::sample($slice_size, @$arr);
-          },
-      }
-  );
-
-You can see some perfomance degradation for large arrays and amoutn of loops.
-So in some cases it can be better to use other methods.
+So, the usage of C<List::MoreUtils::samples> (it's the fastest now) and C<List::Util::sample> is more preferable.
+I'll keep C<random_slice> for backward compatibility.
 
 The benchmark results for C<shuffle> method
 
