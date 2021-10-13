@@ -88,7 +88,7 @@ You can pass so many arguments as Perl stack allows.
 
 Benchmarks of C<random_slice> method in comparison with C<List::MoreUtils::samples> and
 C<List::Util::sample> showed that current version of C<random_slice> is very similar to
-the first ones in case cases. But in case of huge amount of iterations it starts to slow
+the first ones in some cases. But in case of huge amount of iterations it starts to slow
 down due to some performance degradation.
 
 So, the usage of C<List::MoreUtils::samples> (it's the fastest now) and C<List::Util::sample> is more preferable.

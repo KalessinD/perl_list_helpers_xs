@@ -66,7 +66,7 @@
 ### Benchmarks
     Benchmarks of "random_slice" method in comparison with
     "List::MoreUtils::samples" and "List::Util::sample" showed that current
-    version of "random_slice" is very similar to the first ones in case
+    version of "random_slice" is very similar to the first ones in some
     cases. But in case of huge amount of iterations it starts to slow down
     due to some performance degradation.
 
