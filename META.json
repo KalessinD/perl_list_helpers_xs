@@ -48,6 +48,6 @@
          "url" : "https://github.com/KalessinD/perl_linux_sys_cpu_affinity"
       }
    },
-   "version" : "0.18",
+   "version" : "0.19",
    "x_serialization_backend" : "JSON::PP version 4.05"
 }
